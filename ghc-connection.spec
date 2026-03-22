@@ -4,6 +4,7 @@
 #
 %define		pkgname	connection
 Summary:	Simple and easy network connections API
+Summary(pl.UTF-8):	Proste i łatwe w użyciu API do połączeń sieciowych
 Name:		ghc-%{pkgname}
 Version:	0.3.1
 Release:	2
@@ -14,7 +15,10 @@ Source0:	http://hackage.haskell.org/package/%{pkgname}-%{version}/%{pkgname}-%{v
 # Source0-md5:	6a9647665c357cd33118339b777578eb
 URL:		http://hackage.haskell.org/package/connection
 BuildRequires:	ghc >= 6.12.3
+BuildRequires:	ghc-base >= 3
+BuildRequires:	ghc-base < 5
 BuildRequires:	ghc-basement
+BuildRequires:	ghc-containers
 BuildRequires:	ghc-data-default-class
 BuildRequires:	ghc-network >= 2.6.3
 BuildRequires:	ghc-socks >= 0.6
@@ -25,7 +29,10 @@ BuildRequires:	ghc-x509-system >= 1.5
 BuildRequires:	ghc-x509-validation >= 1.5
 %if %{with prof}
 BuildRequires:	ghc-prof
+BuildRequires:	ghc-base-prof >= 3
+BuildRequires:	ghc-base-prof < 5
 BuildRequires:	ghc-basement-prof
+BuildRequires:	ghc-containers-prof
 BuildRequires:	ghc-data-default-class-prof
 BuildRequires:	ghc-network-prof >= 2.6.3
 BuildRequires:	ghc-socks-prof >= 0.6
@@ -38,6 +45,7 @@ BuildRequires:	ghc-x509-validation-prof >= 1.5
 BuildRequires:	rpmbuild(macros) >= 1.608
 %requires_eq	ghc
 Requires(post,postun):	/usr/bin/ghc-pkg
+Requires:	ghc-base >= 3
 Requires:	ghc-basement
 Requires:	ghc-data-default-class
 Requires:	ghc-network >= 2.6.3
@@ -56,14 +64,19 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define		_noautocompressdoc	*.haddock
 
 %description
-This library provides a very simple api to create sockets to a
+This library provides a very simple API to create sockets to a
 destination with the choice of SSL/TLS, and SOCKS.
+
+%description -l pl.UTF-8
+Ta biblioteka udostępnia bardzo proste API do tworzenia gniazd do
+połączeń z opcjami SSL/TLS oraz SOCKS.
 
 %package prof
 Summary:	Profiling %{pkgname} library for GHC
 Summary(pl.UTF-8):	Biblioteka profilująca %{pkgname} dla GHC
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
+Requires:	ghc-base-prof >= 3
 Requires:	ghc-basement-prof
 Requires:	ghc-data-default-class-prof
 Requires:	ghc-network-prof >= 2.6.3
@@ -75,8 +88,8 @@ Requires:	ghc-x509-system-prof >= 1.5
 Requires:	ghc-x509-validation-prof >= 1.5
 
 %description prof
-Profiling %{pkgname} library for GHC.  Should be installed when
-GHC's profiling subsystem is needed.
+Profiling %{pkgname} library for GHC. Should be installed when GHC's
+profiling subsystem is needed.
 
 %description prof -l pl.UTF-8
 Biblioteka profilująca %{pkgname} dla GHC. Powinna być zainstalowana
@@ -94,6 +107,7 @@ runhaskell Setup.hs configure -v2 \
 	--docdir=%{_docdir}/%{name}-%{version}
 
 runhaskell Setup.hs build %{?_smp_mflags}
+
 runhaskell Setup.hs haddock --executables
 
 %install
@@ -104,8 +118,7 @@ runhaskell Setup.hs copy --destdir=$RPM_BUILD_ROOT
 
 # work around automatic haddock docs installation
 %{__rm} -rf %{name}-%{version}-doc
-cp -a $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version} %{name}-%{version}-doc
-%{__rm} -r $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version}
+%{__mv} $RPM_BUILD_ROOT%{_docdir}/%{name}-%{version} %{name}-%{version}-doc
 
 runhaskell Setup.hs register \
 	--gen-pkg-config=$RPM_BUILD_ROOT%{_libdir}/%{ghcdir}/package.conf.d/%{pkgname}.conf
